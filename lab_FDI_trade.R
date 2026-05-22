@@ -36,20 +36,16 @@ exports_cty_yr_clean <- exports_cty_yr_clean %>%
 sum(is.na(exports_cty_yr_clean$ALL_VAL_YR))
 
 #a different way to sort top 10 than we did for BEA
-#here we use slice_max
-top10_data <- imports_cty_yr_clean %>%
+top10_data <- exports_cty_yr_clean %>%
   group_by(YEAR) %>%
-  slice_max(order_by = GEN_VAL_YR, n = 10, with_ties = FALSE) %>%
-  arrange(YEAR, desc(GEN_VAL_YR)) 
-# View the top 10 data
+  slice_max(order_by = ALL_VAL_YR, n = 10, with_ties = FALSE) %>%
+  arrange(YEAR, desc(ALL_VAL_YR)) 
 print(top10_data)
 
-#this assigns every country to a ranking
-#the ranking can change over time so it will depend on the year
-#how a graph ultimately looks.
+# Assign rankings within each year
 top10_data<-top10_data%>%
   group_by(YEAR) %>%
-  arrange(-GEN_VAL_YR, CTY_NAME) %>%
+  arrange(-ALL_VAL_YR, CTY_NAME) %>%
   mutate(rank = row_number()) %>%
   ungroup()
 
