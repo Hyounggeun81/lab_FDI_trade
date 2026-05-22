@@ -35,7 +35,7 @@ exports_cty_yr_clean <- exports_cty_yr_clean %>%
 # Check for possible introduction of NAs due to conversion errors
 sum(is.na(exports_cty_yr_clean$ALL_VAL_YR))
 
-#a different way to sort top 10 than we did for BEA
+# Get top 10 export destinations by year
 top10_data <- exports_cty_yr_clean %>%
   group_by(YEAR) %>%
   slice_max(order_by = ALL_VAL_YR, n = 10, with_ties = FALSE) %>%
@@ -49,11 +49,26 @@ top10_data<-top10_data%>%
   mutate(rank = row_number()) %>%
   ungroup()
 
-#set the year
-yrplot<-2023
-ggplot(top10_data%>%filter(YEAR==yrplot),aes(group = CTY_NAME, y = rank)) +
-  geom_tile(aes(x = GEN_VAL_YR/2, width=GEN_VAL_YR, height=.5, color = CTY_NAME, fill = CTY_NAME),show.legend = FALSE) +
-  geom_text(aes(x = GEN_VAL_YR, y = rank, label = CTY_NAME), nudge_x=50, show.legend = FALSE) +
+# Keep only 2015 and 2025
+top10_2015_2025 <- top10_data %>%
+  filter(YEAR %in% c(2015, 2025))
+
+# Make graph for 2015 and 2025
+export_graph <- ggplot(top10_2015_2025,aes(group = CTY_NAME, y = rank)) +
+  geom_tile(aes(x = ALL_VAL_YR/2, width=ALL_VAL_YR, height=.5, color = CTY_NAME, fill = CTY_NAME),show.legend = FALSE) +
+  geom_text(aes(x = ALL_VAL_YR, y = rank, label = CTY_NAME), nudge_x=100, size = 3.5, show.legend = FALSE) +
   scale_y_reverse(breaks = 1:10, minor_breaks = NULL)+
-  labs(x = "Import Value (billions USD)", y = "Ranking by Imports", title = paste("Top 10 Countries for",yrplot)) +
+  facet_wrap(~ YEAR) +
+  labs(x = "Export Value (billions USD)", y = "Ranking by Exports", title = "Top 10 Destinations for U.S. Exports: 2015 and 2025") +
+  xlim(0, 500) +
   theme_minimal()
+  
+export_graph
+
+# Save graph
+ggsave(
+  filename = "top10_us_exports_2015_2025.png",
+  plot = export_graph,
+  width = 10,
+  height = 6
+)
